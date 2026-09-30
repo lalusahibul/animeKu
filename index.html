@@ -15,6 +15,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -62,6 +64,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             min-height: 400px;
+            flex: 1;
         }
 
         .manga-page {
@@ -77,6 +80,46 @@
             font-style: italic;
             margin-top: 50px;
         }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            text-align: center;
+            color: #888888;
+            font-size: 14px;
+            border-top: 1px solid #2b2b2b;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .chapter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 800px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #2b2b2b;
+        }
+
+        .chapter-btn {
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: none;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .chapter-btn:hover {
+            background-color: #007bff;
+        }
     </style>
 </head>
 
@@ -85,24 +128,27 @@
     <h1 id="manga-title">Memuat Judul Manga...</h1>
 
     <div class="controls">
-        <label for="chapter-select">Pilih Chapter: </label>
-        <select id="chapter-select">
-            <option value="">-- Memuat Chapter --</option>
-        </select>
-        <button onclick="loadChapterImages()">Baca Chapter</button>
+        <h3>Daftar Chapter:</h3>
+
+        <div id="chapter-list-container" class="chapter-grid"></div>
     </div>
 
     <div id="reader-container">
         <p class="loading">Silakan pilih chapter di atas lalu klik "Baca Chapter".</p>
     </div>
 
+    <footer>
+        <p>&copy; 2026 animeKu by <a href="https://instagram.com/lalusahibul_" target="_blank">ibul</a></p>
+    </footer>
+
     <script>
         const API_BASE = '';
-        const chapterSelect = document.getElementById('chapter-select');
+
         const mangaTitle = document.getElementById('manga-title');
+        const chapterListContainer = document.getElementById('chapter-list-container');
         const readerContainer = document.getElementById('reader-container');
 
-        // 1. Ambil Daftar Chapter saat halaman pertama kali dibuka
+        // 1. Ambil Daftar Chapter dan Buat Tombolnya
         async function fetchChapters() {
             try {
                 const response = await fetch(`${API_BASE}/api/manga/one-piece`);
@@ -110,14 +156,16 @@
 
                 if (result.status === 'success') {
                     mangaTitle.innerText = result.data.judul;
-                    chapterSelect.innerHTML = ''; // Kosongkan opsi loading
+                    chapterListContainer.innerHTML = '';
 
-                    // Masukkan daftar chapter ke dalam elemen <select>
                     result.data.chapters.forEach(chap => {
-                        const option = document.createElement('option');
-                        option.value = chap.url;
-                        option.textContent = chap.title;
-                        chapterSelect.appendChild(option);
+                        const btn = document.createElement('button');
+                        btn.className = 'chapter-btn';
+                        btn.textContent = chap.title;
+
+                        btn.onclick = () => loadChapterImages(chap.url);
+
+                        chapterListContainer.appendChild(btn);
                     });
                 } else {
                     mangaTitle.innerText = 'Gagal memuat judul manga';
@@ -128,34 +176,28 @@
             }
         }
 
-        // 2. Ambil Gambar dari Chapter yang dipilih
-        async function loadChapterImages() {
-            const selectedUrl = chapterSelect.value;
-            if (!selectedUrl) {
-                alert('Silakan pilih chapter terlebih dahulu!');
-                return;
-            }
+        // 2. Ambil Gambar dari Chapter yang Dipilih via Tombol
+        async function loadChapterImages(chapterUrl) {
+            if (!chapterUrl) return;
 
             readerContainer.innerHTML = '<p class="loading">Memuat gambar chapter...</p>';
 
             try {
-                const response = await fetch(`${API_BASE}/api/manga/chapter-images?url=${encodeURIComponent(selectedUrl)}`);
+                const response = await fetch(`${API_BASE}/api/manga/chapter-images?url=${encodeURIComponent(chapterUrl)}`);
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    readerContainer.innerHTML = ''; // Kosongkan area reader
+                    readerContainer.innerHTML = '';
 
                     if (result.images.length === 0) {
                         readerContainer.innerHTML = '<p class="loading">Tidak ada gambar ditemukan di chapter ini.</p>';
                         return;
                     }
-
-                    // Buat tag <img> untuk setiap link gambar yang dikirim API
                     result.images.forEach(imgUrl => {
                         const img = document.createElement('img');
                         img.src = imgUrl;
                         img.className = 'manga-page';
-                        img.loading = 'lazy'; // Lazy loading agar halaman ringan saat di-scroll
+                        img.loading = 'lazy';
                         readerContainer.appendChild(img);
                     });
                 } else {
@@ -167,7 +209,6 @@
             }
         }
 
-        // Jalankan fungsi saat halaman dimuat
         fetchChapters();
     </script>
 

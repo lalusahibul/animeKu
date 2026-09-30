@@ -86,11 +86,11 @@ app.get('/api/manga/chapter-images', async (req, res) => {
         res.status(500).json({ status: 'error', message: error.message });
     }
 });
-module.exports = app;
-// app.listen(PORT, () => {
-//     // console.log(`Server API berjalan di: http://localhost:${PORT}`);
-//     // console.log(`1. Cek Chapter: http://localhost:${PORT}/api/manga/one-piece`);
-//     // console.log(`2. Cek Gambar : http://localhost:${PORT}/api/manga/chapter-images?url=URL_CHAPTER`);
-//     console.log(`Chapters: http://localhost:${PORT}/api/manga/one-piece`);
-//     console.log(`Images : http://localhost:${PORT}/api/manga/chapter-images?url=URL_CHAPTER`);
-// });
+// module.exports = app;
+app.listen(PORT, () => {
+    // console.log(`Server API berjalan di: http://localhost:${PORT}`);
+    // console.log(`1. Cek Chapter: http://localhost:${PORT}/api/manga/one-piece`);
+    // console.log(`2. Cek Gambar : http://localhost:${PORT}/api/manga/chapter-images?url=URL_CHAPTER`);
+    console.log(`Chapters: http://localhost:${PORT}/api/manga/one-piece`);
+    console.log(`Images : http://localhost:${PORT}/api/manga/chapter-images?url=URL_CHAPTER`);
+});
